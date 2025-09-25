@@ -48,7 +48,7 @@ public class UserController {
         return userService.findUserByUsername(username);
     }
 
-    @PostMapping("/{username}")
+    @PatchMapping("/{username}")
     public User updateUser(@PathVariable String username, @RequestBody UpdateUserRequest updateUserRequest) {
         return userService.updateUser(
                 username,
@@ -58,6 +58,11 @@ public class UserController {
                 updateUserRequest.getProfileImg(),
                 updateUserRequest.getPhone()
         );
+    }
+
+    @PostMapping("/logout")
+    public Optional<User> logoutUser(@RequestBody String username) {
+        return userService.logoutUser(username);
     }
 }
 
