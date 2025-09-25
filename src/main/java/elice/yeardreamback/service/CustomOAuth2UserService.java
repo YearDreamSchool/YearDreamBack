@@ -25,53 +25,41 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         System.out.println(oAuth2User);
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        OAuth2Response oAuth2Response = null;
+        OAuth2Response oAuth2Response;
 
         if (registrationId.equals("naver")) {
             oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
-        }
-        else if (registrationId.equals("google")) {
+        } else if (registrationId.equals("google")) {
             oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
-        }
-        else if (registrationId.equals("kakao")) {
+        } else if (registrationId.equals("kakao")) {
             oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
-        }
-
-        else {
+        } else {
             return null;
         }
+
         String username = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
-        User existData = userRepository.findByUsername(username);
 
-        if (existData == null) {
-            User user = new User();
-            user.setName(oAuth2Response.getName());
-            user.setUsername(username);
-            user.setEmail(oAuth2Response.getEmail());
-            user.setRole("ROLE_USER");
+        User user = userRepository.findByUsername(username)
+                .map(existingUser -> {
+                    existingUser.setName(oAuth2Response.getName());
+                    existingUser.setEmail(oAuth2Response.getEmail());
+                    return userRepository.save(existingUser);
+                })
+                .orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setName(oAuth2Response.getName());
+                    newUser.setUsername(username);
+                    newUser.setEmail(oAuth2Response.getEmail());
+                    newUser.setRole("USER");
+                    return userRepository.save(newUser);
+                });
 
-            userRepository.save(user);
+        UserDTO userDTO = UserDTO.builder()
+                .username(user.getUsername())
+                .name(user.getName())
+                .role(user.getRole())
+                .build();
 
-            UserDTO userDTO = new UserDTO();
-            userDTO.setName(oAuth2Response.getName());
-            userDTO.setUsername(username);
-            userDTO.setRole("ROLE_USER");
-
-            return new CustomOAuth2User(userDTO);
-        }
-        else {
-            existData.setName(oAuth2Response.getName());
-            existData.setEmail(oAuth2Response.getEmail());
-
-            userRepository.save(existData);
-
-            UserDTO userDTO = new UserDTO();
-            userDTO.setUsername(existData.getUsername());
-            userDTO.setName(oAuth2Response.getName());
-            userDTO.setRole(existData.getRole());
-
-            return new CustomOAuth2User(userDTO);
-        }
-
+        return new CustomOAuth2User(userDTO);
     }
 }

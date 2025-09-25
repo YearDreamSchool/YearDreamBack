@@ -5,6 +5,7 @@ import elice.yeardreamback.jwt.JWTUtil;
 import elice.yeardreamback.oauth2.CustomSuccessHandler;
 import elice.yeardreamback.service.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -52,7 +53,6 @@ public class SecurityConfig {
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setMaxAge(3600L);
 
-                        configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
                         configuration.setExposedHeaders(Collections.singletonList("Authorization"));
 
                         return configuration;
@@ -61,11 +61,8 @@ public class SecurityConfig {
 
         // csrf
         http
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/h2-console/**")
-                .disable()
-            )
-            .headers(headers -> headers
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers
                 .frameOptions(frame -> frame.sameOrigin())
             );
 
@@ -91,13 +88,30 @@ public class SecurityConfig {
         // 경로별 인가
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/h2-console/**").permitAll()
-                        .anyRequest().authenticated());
+                        .requestMatchers(
+                                "/",
+                                "/h2-console/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/oauth2/authorization/**",
+                                "/api/token/refresh"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                );
 
         // 세션 설정
         http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        http
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"error\":\"Unauthorized\"}");
+                        })
+                );
 
         return http.build();
     }

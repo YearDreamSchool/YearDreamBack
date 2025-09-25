@@ -33,8 +33,8 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         if (token == null) {
-            System.out.println("token null");
             filterChain.doFilter(request, response);
+            System.out.println("token null");
             return;
         }
 
@@ -46,12 +46,15 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // 토큰에서 정보 추출
         String username = jwtUtil.getUsername(token);
+        String name = jwtUtil.getName(token);
         String role = jwtUtil.getRole(token);
 
         // CustomOAuth2User 생성
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUsername(username);
-        userDTO.setRole(role);
+        UserDTO userDTO = UserDTO.builder()
+                .role(role)
+                .name(name)
+                .username(username)
+                .build();
 
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
 

@@ -31,27 +31,29 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
         String username = customOAuth2User.getUsername();
+        String name = customOAuth2User.getName();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt(username, role, 60*60*60L);
+        long accessExpiredMs = 30 * 1000L;
+        long refreshExpiredMs = 7 * 24 * 60 * 60 * 1000L;
 
-        response.addHeader("Authorization", "Bearer " + token);
-//        response.addCookie(createCookie("Authorization", token));
-        response.sendRedirect("http://localhost:3000/");
+        String accessToken = jwtUtil.createJwt("access", username, role, name, accessExpiredMs);
+        String refreshToken = jwtUtil.createJwt("refresh", username, role, name, refreshExpiredMs);
+
+        // RefreshToken을 HttpOnly 쿠키로 저장
+        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(false);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge((int) (refreshExpiredMs / 1000));
+        response.addCookie(refreshCookie);
+
+        // 액세스 토큰은 redirect URL에 쿼리로 전달
+        String redirectUrl = "http://localhost:3000/oauth/redirect?token=" + accessToken;
+        response.sendRedirect(redirectUrl);
     }
-
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60*60*60);
-        // cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-
-        return cookie;
-    }
-
 }
