@@ -12,11 +12,11 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final TokenService tokenService;
+    private final TokenServiceImpl tokenServiceImpl;
     private final UserRepository userRepository;
 
-    public UserServiceImpl(TokenService tokenService, UserRepository userRepository) {
-        this.tokenService = tokenService;
+    public UserServiceImpl(TokenServiceImpl tokenServiceImpl, UserRepository userRepository) {
+        this.tokenServiceImpl = tokenServiceImpl;
         this.userRepository = userRepository;
     }
 
@@ -39,6 +39,6 @@ public class UserServiceImpl implements UserService {
     }
 
     public void logoutUser(String token) {
-        tokenService.invalidateToken(token);
+        tokenServiceImpl.invalidateToken(token);
     }
 }

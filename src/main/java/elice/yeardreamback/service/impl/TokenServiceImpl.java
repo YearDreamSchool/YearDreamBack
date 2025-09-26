@@ -4,11 +4,11 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 
 @Service
-public class TokenService {
+public class TokenServiceImpl {
 
     private final RedisTemplate<String, String> redisTemplate;
 
-    public TokenService(RedisTemplate<String, String> redisTemplate) {
+    public TokenServiceImpl(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
