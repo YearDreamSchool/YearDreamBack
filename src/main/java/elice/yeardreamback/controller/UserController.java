@@ -2,10 +2,15 @@ package elice.yeardreamback.controller;
 
 import elice.yeardreamback.dto.CustomOAuth2User;
 import elice.yeardreamback.dto.LoginUserResponse;
+import elice.yeardreamback.dto.LogoutRequest;
 import elice.yeardreamback.dto.UpdateUserRequest;
 import elice.yeardreamback.entity.User;
 import elice.yeardreamback.exception.UserNotAuthenticatedException;
 import elice.yeardreamback.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -61,8 +66,33 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public Optional<User> logoutUser(@RequestBody String username) {
-        return userService.logoutUser(username);
+    public ResponseEntity<String> logoutUser(HttpServletRequest request, HttpServletResponse response, @RequestHeader("Authorization") String authorizationHeader) {
+        // 쿠키에서 refresh token 가져오기
+        Cookie[] cookies = request.getCookies();
+        String refreshToken = null;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (refreshToken == null) {
+            return ResponseEntity.badRequest().body("리프레시 토큰이 없습니다.");
+        }
+
+        userService.logoutUser(refreshToken);
+
+        Cookie deleteCookie = new Cookie("refreshToken", null);
+        deleteCookie.setHttpOnly(true);
+        deleteCookie.setSecure(false);
+        deleteCookie.setPath("/");
+        deleteCookie.setMaxAge(0);
+        response.addCookie(deleteCookie);
+
+        return ResponseEntity.ok("로그아웃이 성공적으로 처리되었습니다.");
     }
 }
 

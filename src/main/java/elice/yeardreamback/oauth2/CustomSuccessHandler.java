@@ -44,7 +44,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String accessToken = jwtUtil.createJwt("access", username, role, name, accessExpiredMs);
         String refreshToken = jwtUtil.createJwt("refresh", username, role, name, refreshExpiredMs);
 
-        // RefreshToken을 HttpOnly 쿠키로 저장
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(false);
