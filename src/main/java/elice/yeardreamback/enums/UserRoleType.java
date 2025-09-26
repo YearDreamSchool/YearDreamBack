@@ -1,4 +1,4 @@
-package elice.yeardreamback.entity;
+package elice.yeardreamback.enums;
 
 public enum UserRoleType {
     ADMIN, COACH, USER;
