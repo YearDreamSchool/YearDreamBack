@@ -6,6 +6,7 @@ import elice.yeardreamback.calender.entity.EventCategory;
 import elice.yeardreamback.calender.exception.CategoryNotFoundException;
 import elice.yeardreamback.calender.mapper.EventCategoryMapper;
 import elice.yeardreamback.calender.repository.EventCategoryRepository;
+import elice.yeardreamback.calender.service.AccessControlService;
 import elice.yeardreamback.calender.service.EventCategoryService;
 import elice.yeardreamback.entity.User;
 import elice.yeardreamback.exception.UserNotFoundException;
@@ -30,6 +31,7 @@ public class EventCategoryServiceImpl implements EventCategoryService {
     private final EventCategoryRepository eventCategoryRepository;
     private final UserRepository userRepository;
     private final EventCategoryMapper eventCategoryMapper;
+    private final AccessControlService accessControlService;
 
     private static final int MAX_CATEGORIES_PER_USER = 50; // 사용자당 최대 카테고리 수
 
@@ -65,8 +67,8 @@ public class EventCategoryServiceImpl implements EventCategoryService {
     public EventCategoryResponse updateCategory(String username, Long categoryId, EventCategoryRequest request) {
         log.info("카테고리 수정 요청: ID={}, 사용자={}, 이름={}", categoryId, username, request.getName());
 
-        // 카테고리 조회 및 권한 확인
-        EventCategory category = findCategoryByIdAndUsername(categoryId, username);
+        // 카테고리 접근 권한 확인
+        EventCategory category = accessControlService.verifyCategoryAccess(username, categoryId);
 
         // 카테고리 이름 중복 확인 (현재 카테고리 제외)
         if (isDuplicateName(username, request.getName(), categoryId)) {
@@ -86,8 +88,8 @@ public class EventCategoryServiceImpl implements EventCategoryService {
     public void deleteCategory(String username, Long categoryId) {
         log.info("카테고리 삭제 요청: ID={}, 사용자={}", categoryId, username);
 
-        // 카테고리 조회 및 권한 확인
-        EventCategory category = findCategoryByIdAndUsername(categoryId, username);
+        // 카테고리 접근 권한 확인
+        EventCategory category = accessControlService.verifyCategoryAccess(username, categoryId);
 
         // 삭제 가능 여부 확인 (이벤트가 있는 카테고리는 삭제 불가)
         if (!category.canBeDeleted()) {
@@ -104,7 +106,8 @@ public class EventCategoryServiceImpl implements EventCategoryService {
     public EventCategoryResponse getCategory(String username, Long categoryId) {
         log.debug("카테고리 조회 요청: ID={}, 사용자={}", categoryId, username);
 
-        EventCategory category = findCategoryByIdAndUsername(categoryId, username);
+        // 카테고리 접근 권한 확인
+        EventCategory category = accessControlService.verifyCategoryAccess(username, categoryId);
         return eventCategoryMapper.toResponse(category);
     }
 

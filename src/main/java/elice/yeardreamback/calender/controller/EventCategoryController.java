@@ -5,6 +5,9 @@ import elice.yeardreamback.calender.dto.EventCategoryResponse;
 import elice.yeardreamback.calender.service.EventCategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,10 +34,54 @@ public class EventCategoryController {
 
     private final EventCategoryService eventCategoryService;
 
-    @Operation(summary = "새 카테고리 생성", description = "새로운 이벤트 카테고리를 생성합니다.")
+    @Operation(
+        summary = "새 카테고리 생성", 
+        description = "새로운 이벤트 카테고리를 생성합니다. 사용자당 최대 50개까지 생성 가능하며, 카테고리 이름은 중복될 수 없습니다.",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "생성할 카테고리 정보",
+            required = true,
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = EventCategoryRequest.class),
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    name = "카테고리 생성 예시",
+                    value = """
+                    {
+                        "name": "업무",
+                        "color": "#FF0000",
+                        "description": "업무 관련 일정"
+                    }
+                    """
+                )
+            )
+        )
+    )
     @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "카테고리 생성 성공"),
-        @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터 또는 중복된 카테고리 이름"),
+        @ApiResponse(
+            responseCode = "201", 
+            description = "카테고리 생성 성공",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = EventCategoryResponse.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400", 
+            description = "잘못된 요청 데이터 (중복된 이름, 잘못된 색상 형식, 개수 제한 초과 등)",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    value = """
+                    {
+                        "timestamp": "2024-12-01T10:00:00",
+                        "status": 400,
+                        "error": "Bad Request",
+                        "message": "이미 존재하는 카테고리 이름입니다: 업무"
+                    }
+                    """
+                )
+            )
+        ),
         @ApiResponse(responseCode = "401", description = "인증 필요")
     })
     @PostMapping

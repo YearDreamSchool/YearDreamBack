@@ -89,6 +89,23 @@ public class CalendarExceptionHandler {
     }
 
     /**
+     * 접근 권한이 없는 경우
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+        log.warn("접근 권한 없음: {}", ex.getMessage());
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+            .timestamp(LocalDateTime.now())
+            .status(HttpStatus.FORBIDDEN.value())
+            .error("Access Denied")
+            .message(ex.getMessage())
+            .build();
+        
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    /**
      * 일반적인 비즈니스 로직 예외 (IllegalArgumentException)
      */
     @ExceptionHandler(IllegalArgumentException.class)

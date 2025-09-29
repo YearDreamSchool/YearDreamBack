@@ -10,6 +10,7 @@ import elice.yeardreamback.calender.exception.InvalidEventTimeException;
 import elice.yeardreamback.calender.mapper.CalendarEventMapper;
 import elice.yeardreamback.calender.repository.CalendarEventRepository;
 import elice.yeardreamback.calender.repository.EventCategoryRepository;
+import elice.yeardreamback.calender.service.AccessControlService;
 import elice.yeardreamback.calender.service.CalendarEventService;
 import elice.yeardreamback.entity.User;
 import elice.yeardreamback.exception.UserNotFoundException;
@@ -39,6 +40,7 @@ public class CalendarEventServiceImpl implements CalendarEventService {
     private final EventCategoryRepository eventCategoryRepository;
     private final UserRepository userRepository;
     private final CalendarEventMapper calendarEventMapper;
+    private final AccessControlService accessControlService;
 
     @Override
     @Transactional
@@ -79,8 +81,8 @@ public class CalendarEventServiceImpl implements CalendarEventService {
     public CalendarEventResponse updateEvent(String username, Long eventId, CalendarEventRequest request) {
         log.info("이벤트 수정 요청: ID={}, 사용자={}", eventId, username);
 
-        // 이벤트 조회 및 권한 확인
-        CalendarEvent event = findEventByIdAndUsername(eventId, username);
+        // 이벤트 편집 권한 확인
+        CalendarEvent event = accessControlService.verifyEventEditAccess(username, eventId);
 
         // 시간 범위 유효성 검사
         validateEventTimeRange(request.getStartTime(), request.getEndTime());
@@ -112,8 +114,8 @@ public class CalendarEventServiceImpl implements CalendarEventService {
     public void deleteEvent(String username, Long eventId) {
         log.info("이벤트 삭제 요청: ID={}, 사용자={}", eventId, username);
 
-        // 이벤트 조회 및 권한 확인
-        CalendarEvent event = findEventByIdAndUsername(eventId, username);
+        // 이벤트 삭제 권한 확인 (소유자만 가능)
+        CalendarEvent event = accessControlService.verifyEventDeleteAccess(username, eventId);
 
         // 이벤트 삭제
         calendarEventRepository.delete(event);
@@ -125,7 +127,8 @@ public class CalendarEventServiceImpl implements CalendarEventService {
     public CalendarEventResponse getEvent(String username, Long eventId) {
         log.debug("이벤트 조회 요청: ID={}, 사용자={}", eventId, username);
 
-        CalendarEvent event = findEventByIdAndUsername(eventId, username);
+        // 이벤트 읽기 권한 확인 (소유자 또는 공유받은 사용자)
+        CalendarEvent event = accessControlService.verifyEventReadAccess(username, eventId);
         return calendarEventMapper.toResponse(event, username);
     }
 

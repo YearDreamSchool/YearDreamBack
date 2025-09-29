@@ -6,6 +6,9 @@ import elice.yeardreamback.calender.enums.EventStatus;
 import elice.yeardreamback.calender.service.CalendarEventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,11 +38,63 @@ public class CalendarEventController {
 
     private final CalendarEventService calendarEventService;
 
-    @Operation(summary = "새 이벤트 생성", description = "새로운 캘린더 이벤트를 생성합니다.")
+    @Operation(
+        summary = "새 이벤트 생성", 
+        description = "새로운 캘린더 이벤트를 생성합니다. 제목, 시작/종료 시간은 필수이며, 카테고리와 알림은 선택사항입니다.",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "생성할 이벤트 정보",
+            required = true,
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = CalendarEventRequest.class),
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    name = "이벤트 생성 예시",
+                    value = """
+                    {
+                        "title": "팀 회의",
+                        "description": "주간 팀 회의",
+                        "startTime": "2024-12-01T14:00:00",
+                        "endTime": "2024-12-01T15:00:00",
+                        "location": "회의실 A",
+                        "categoryId": 1,
+                        "reminderMinutes": [30, 60]
+                    }
+                    """
+                )
+            )
+        )
+    )
     @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "이벤트 생성 성공"),
-        @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
-        @ApiResponse(responseCode = "401", description = "인증 필요")
+        @ApiResponse(
+            responseCode = "201", 
+            description = "이벤트 생성 성공",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = CalendarEventResponse.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400", 
+            description = "잘못된 요청 데이터 (필수 필드 누락, 잘못된 시간 범위 등)",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    value = """
+                    {
+                        "timestamp": "2024-12-01T10:00:00",
+                        "status": 400,
+                        "error": "Validation Failed",
+                        "message": "입력 데이터 유효성 검사에 실패했습니다",
+                        "fieldErrors": {
+                            "title": "이벤트 제목은 필수입니다",
+                            "startTime": "이벤트 시작 시간은 필수입니다"
+                        }
+                    }
+                    """
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "401", description = "인증 필요 - JWT 토큰이 없거나 유효하지 않음")
     })
     @PostMapping
     public ResponseEntity<CalendarEventResponse> createEvent(
@@ -52,12 +107,41 @@ public class CalendarEventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "이벤트 수정", description = "기존 이벤트를 수정합니다.")
+    @Operation(
+        summary = "이벤트 수정", 
+        description = "기존 이벤트를 수정합니다. 이벤트 소유자만 수정할 수 있으며, 공유된 이벤트의 경우 편집 권한이 있는 사용자만 수정 가능합니다."
+    )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "이벤트 수정 성공"),
-        @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+        @ApiResponse(
+            responseCode = "200", 
+            description = "이벤트 수정 성공",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = CalendarEventResponse.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400", 
+            description = "잘못된 요청 데이터 (시간 범위 오류, 유효성 검사 실패 등)"
+        ),
         @ApiResponse(responseCode = "401", description = "인증 필요"),
-        @ApiResponse(responseCode = "404", description = "이벤트를 찾을 수 없음")
+        @ApiResponse(
+            responseCode = "404", 
+            description = "이벤트를 찾을 수 없거나 수정 권한이 없음",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    value = """
+                    {
+                        "timestamp": "2024-12-01T10:00:00",
+                        "status": 404,
+                        "error": "Event Not Found",
+                        "message": "이벤트를 찾을 수 없거나 접근 권한이 없습니다: 123"
+                    }
+                    """
+                )
+            )
+        )
     })
     @PutMapping("/{eventId}")
     public ResponseEntity<CalendarEventResponse> updateEvent(
@@ -105,8 +189,52 @@ public class CalendarEventController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "사용자 이벤트 목록 조회", description = "사용자의 모든 이벤트를 조회합니다.")
-    @ApiResponse(responseCode = "200", description = "이벤트 목록 조회 성공")
+    @Operation(
+        summary = "사용자 이벤트 목록 조회", 
+        description = "현재 인증된 사용자의 모든 이벤트를 시작 시간 순으로 조회합니다. 공유받은 이벤트는 포함되지 않습니다."
+    )
+    @ApiResponse(
+        responseCode = "200", 
+        description = "이벤트 목록 조회 성공",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+            mediaType = "application/json",
+            schema = @io.swagger.v3.oas.annotations.media.Schema(
+                type = "array",
+                implementation = CalendarEventResponse.class
+            ),
+            examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                name = "이벤트 목록 예시",
+                value = """
+                [
+                    {
+                        "id": 1,
+                        "title": "팀 회의",
+                        "description": "주간 팀 회의",
+                        "startTime": "2024-12-01T14:00:00",
+                        "endTime": "2024-12-01T15:00:00",
+                        "location": "회의실 A",
+                        "status": "SCHEDULED",
+                        "category": {
+                            "id": 1,
+                            "name": "업무",
+                            "color": "#FF0000"
+                        },
+                        "reminders": [
+                            {
+                                "id": 1,
+                                "minutesBefore": 30,
+                                "isActive": true
+                            }
+                        ],
+                        "ownerUsername": "testuser",
+                        "isShared": false,
+                        "canEdit": true
+                    }
+                ]
+                """
+            )
+        )
+    )
     @GetMapping
     public ResponseEntity<List<CalendarEventResponse>> getUserEvents(Authentication authentication) {
         log.debug("사용자 이벤트 목록 조회: 사용자={}", authentication.getName());
