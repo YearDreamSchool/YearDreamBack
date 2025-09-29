@@ -20,7 +20,7 @@ public class Students {
     private String name;
 
     @Column(name = "seat_num")
-    private int seatNum;
+    private Integer seatNum;
 
     @Enumerated(EnumType.STRING)
     private StudentStatus status;
