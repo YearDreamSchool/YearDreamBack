@@ -6,7 +6,6 @@ import elice.yeardreamback.user.dto.UpdateUserRequest;
 import elice.yeardreamback.user.entity.User;
 import elice.yeardreamback.user.exception.UserNotAuthenticatedException;
 import elice.yeardreamback.user.service.UserService;
-import io.jsonwebtoken.security.Request;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
