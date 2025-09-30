@@ -5,7 +5,8 @@ import elice.yeardreamback.calender.dto.CalendarEventResponse;
 import elice.yeardreamback.calender.entity.CalendarEvent;
 import elice.yeardreamback.calender.entity.EventCategory;
 import elice.yeardreamback.calender.entity.EventReminder;
-import elice.yeardreamback.entity.User;
+import elice.yeardreamback.user.entity.User;
+
 import org.springframework.stereotype.Component;
 
 import java.util.List;
