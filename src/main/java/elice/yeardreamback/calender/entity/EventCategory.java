@@ -141,4 +141,8 @@ public class EventCategory {
         validateCategory();
         setDefaultColorIfNull();
     }
+
+	public String getOwnerUsername() {
+		return this.user.getUsername();
+	}
 }

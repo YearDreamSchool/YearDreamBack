@@ -208,4 +208,8 @@ public class CalendarEvent {
         shares.remove(share);
         share.setEvent(null);
     }
+
+	public String getOwnerUsername() {
+		return this.user.getUsername();
+	}
 }

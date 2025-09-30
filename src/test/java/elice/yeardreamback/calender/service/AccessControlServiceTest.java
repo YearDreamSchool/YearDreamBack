@@ -97,7 +97,7 @@ class AccessControlServiceTest {
     void verifyEventReadAccess_SharedUser_Success() {
         // given
         given(calendarEventRepository.findById(1L)).willReturn(Optional.of(testEvent));
-        given(eventShareRepository.findByEventIdAndSharedWithUsername(1L, "shared_user"))
+        given(eventShareRepository.findByEventIdAndSharedWithUserUsername(1L, "shared_user"))
                 .willReturn(Optional.of(testEventShare));
 
         // when
@@ -112,7 +112,7 @@ class AccessControlServiceTest {
     void verifyEventReadAccess_UnauthorizedUser_Failure() {
         // given
         given(calendarEventRepository.findById(1L)).willReturn(Optional.of(testEvent));
-        given(eventShareRepository.findByEventIdAndSharedWithUsername(1L, "unauthorized_user"))
+        given(eventShareRepository.findByEventIdAndSharedWithUserUsername(1L, "unauthorized_user"))
                 .willReturn(Optional.empty());
 
         // when & then
@@ -152,7 +152,7 @@ class AccessControlServiceTest {
         // given
         testEventShare.setPermission(SharePermission.EDIT);
         given(calendarEventRepository.findById(1L)).willReturn(Optional.of(testEvent));
-        given(eventShareRepository.findByEventIdAndSharedWithUsername(1L, "shared_user"))
+        given(eventShareRepository.findByEventIdAndSharedWithUserUsername(1L, "shared_user"))
                 .willReturn(Optional.of(testEventShare));
 
         // when
@@ -167,7 +167,7 @@ class AccessControlServiceTest {
     void verifyEventEditAccess_SharedUserWithViewOnlyPermission_Failure() {
         // given
         given(calendarEventRepository.findById(1L)).willReturn(Optional.of(testEvent));
-        given(eventShareRepository.findByEventIdAndSharedWithUsername(1L, "shared_user"))
+        given(eventShareRepository.findByEventIdAndSharedWithUserUsername(1L, "shared_user"))
                 .willReturn(Optional.of(testEventShare)); // VIEW_ONLY 권한
 
         // when & then
@@ -281,7 +281,7 @@ class AccessControlServiceTest {
     void hasEventEditPermission_WithoutPermission_ReturnsFalse() {
         // given
         given(calendarEventRepository.findById(1L)).willReturn(Optional.of(testEvent));
-        given(eventShareRepository.findByEventIdAndSharedWithUsername(1L, "other_user"))
+        given(eventShareRepository.findByEventIdAndSharedWithUserUsername(1L, "other_user"))
                 .willReturn(Optional.empty());
 
         // when
@@ -309,7 +309,7 @@ class AccessControlServiceTest {
     void hasEventReadPermission_WithoutPermission_ReturnsFalse() {
         // given
         given(calendarEventRepository.findById(1L)).willReturn(Optional.of(testEvent));
-        given(eventShareRepository.findByEventIdAndSharedWithUsername(1L, "other_user"))
+        given(eventShareRepository.findByEventIdAndSharedWithUserUsername(1L, "other_user"))
                 .willReturn(Optional.empty());
 
         // when
