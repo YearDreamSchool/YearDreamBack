@@ -2,7 +2,7 @@ package elice.yeardreamback.calender.entity;
 
 import elice.yeardreamback.calender.enums.EventStatus;
 import elice.yeardreamback.calender.exception.InvalidEventTimeException;
-import elice.yeardreamback.entity.User;
+import elice.yeardreamback.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;

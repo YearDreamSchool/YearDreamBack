@@ -3,7 +3,7 @@ package elice.yeardreamback.calender.mapper;
 import elice.yeardreamback.calender.dto.EventCategoryRequest;
 import elice.yeardreamback.calender.dto.EventCategoryResponse;
 import elice.yeardreamback.calender.entity.EventCategory;
-import elice.yeardreamback.entity.User;
+import elice.yeardreamback.user.entity.User;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
