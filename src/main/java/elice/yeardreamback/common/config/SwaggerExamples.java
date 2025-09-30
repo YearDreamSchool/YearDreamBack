@@ -1,4 +1,4 @@
-package elice.yeardreamback.calender.config;
+package elice.yeardreamback.common.config;
 
 /**
  * Swagger API 문서화를 위한 예시 데이터 상수 클래스

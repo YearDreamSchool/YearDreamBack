@@ -1,4 +1,4 @@
-package elice.yeardreamback.calender.config;
+package elice.yeardreamback.common.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.examples.Example;
@@ -7,8 +7,6 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 /**
  * Swagger OpenAPI 문서 커스터마이저
