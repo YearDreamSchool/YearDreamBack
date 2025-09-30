@@ -94,5 +94,5 @@ public interface EventShareRepository extends JpaRepository<EventShare, Long> {
     @Query("DELETE FROM EventShare s WHERE s.event.user.username = :ownerUsername")
     void deleteByEventOwnerUsername(@Param("ownerUsername") String ownerUsername);
 
-	Optional<EventShare> findByEventIdAndSharedWithUsername(Long eventId, String username);
+
 }

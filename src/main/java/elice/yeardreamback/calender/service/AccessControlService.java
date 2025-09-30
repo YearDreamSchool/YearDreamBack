@@ -55,7 +55,7 @@ public class AccessControlService {
         
         // 공유받은 사용자인지 확인
         Optional<EventShare> eventShare = eventShareRepository
-                .findByEventIdAndSharedWithUsername(eventId, username);
+                .findByEventIdAndSharedWithUserUsername(eventId, username);
         
         if (eventShare.isPresent()) {
             log.debug("공유된 이벤트 접근 허용: 사용자={}, 이벤트ID={}, 권한={}", 
@@ -91,7 +91,7 @@ public class AccessControlService {
         
         // 편집 권한이 있는 공유 사용자인지 확인
         Optional<EventShare> eventShare = eventShareRepository
-                .findByEventIdAndSharedWithUsername(eventId, username);
+                .findByEventIdAndSharedWithUserUsername(eventId, username);
         
         if (eventShare.isPresent() && eventShare.get().getPermission() == SharePermission.EDIT) {
             log.debug("공유된 이벤트 편집 허용: 사용자={}, 이벤트ID={}", username, eventId);
