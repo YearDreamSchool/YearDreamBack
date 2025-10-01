@@ -4,12 +4,14 @@ import elice.yeardreamback.oauth.dto.CustomOAuth2User;
 import elice.yeardreamback.user.dto.LoginUserResponse;
 import elice.yeardreamback.user.dto.UpdateUserRequest;
 import elice.yeardreamback.user.entity.User;
+import elice.yeardreamback.user.exception.UnauthorizedUserAccessException;
 import elice.yeardreamback.user.exception.UserNotAuthenticatedException;
 import elice.yeardreamback.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,6 +24,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "User", description = "유저 API")
 public class UserController {
 
     private final UserService userService;
@@ -29,20 +32,6 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
-//    @Operation(
-//            summary = "사용자 회원가입 API",
-//            description = "새로운 사용자를 등록합니다. 사용자 이름, 역할, 이메일, 프로필 이미지 URL, 전화번호 등의 정보를 포함할 수 있습니다.",
-//            responses = {
-//                    @ApiResponse(responseCode = "200",
-//                            description = "성공적으로 사용자가 등록되었습니다.",
-//                            content = @Content(mediaType = "application/json",
-//                                    schema = @Schema(implementation = User.class)))}
-//    )
-//    @PostMapping("/register")
-//    public User registerUser(@RequestBody Request request) {
-//
-//    }
 
     @Operation(
             summary = "로그인한 사용자 정보 조회 API",
@@ -111,6 +100,16 @@ public class UserController {
                                     mediaType = "application/json", schema = @Schema(implementation = User.class)))})
     @PatchMapping("/{username}")
     public User updateUser(@PathVariable String username, @RequestBody UpdateUserRequest updateUserRequest) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UserNotAuthenticatedException("수정 권한을 확인하기 위해 인증이 필요합니다.");
+        }
+        String currentUsername = authentication.getName();
+        if (!currentUsername.equals(username)) {
+            throw new UnauthorizedUserAccessException("다른 사용자의 정보를 수정할 수 없습니다.");
+        }
+
         return userService.updateUser(
                 username,
                 updateUserRequest.getName(),
