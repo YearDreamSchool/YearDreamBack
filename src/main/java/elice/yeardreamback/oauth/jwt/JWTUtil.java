@@ -111,13 +111,26 @@ public class JWTUtil {
      * @param token 검증할 JWT 문자열
      * @return 토큰 유형이 "refresh"이면 true, 아니면 false (서명 오류 포함)
      */
+//    public Boolean isRefreshToken(String token) {
+//        try {
+//            Claims claims = Jwts.parser()
+//                    .setSigningKey(secretKey)
+//                    .build()
+//                    .parseClaimsJws(token)
+//                    .getBody();
+//            return "refresh".equals(claims.get("tokenType", String.class));
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
     public Boolean isRefreshToken(String token) {
         try {
             Claims claims = Jwts.parser()
-                    .setSigningKey(secretKey)
+                    .verifyWith(secretKey)
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .parseSignedClaims(token)
+                    .getPayload();
+
             return "refresh".equals(claims.get("tokenType", String.class));
         } catch (Exception e) {
             return false;

@@ -1,6 +1,7 @@
 package elice.yeardreamback.user.service.impl;
 
 import elice.yeardreamback.user.entity.User;
+import elice.yeardreamback.user.exception.DuplicateEmailException;
 import elice.yeardreamback.user.exception.UserNotFoundException;
 import elice.yeardreamback.user.repository.UserRepository;
 import elice.yeardreamback.oauth.service.impl.TokenServiceImpl;
@@ -56,6 +57,18 @@ public class UserServiceImpl implements UserService {
         // 사용자 조회. 없으면 UserNotFoundException을 발생시키고 트랜잭션 롤백
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
+
+        if (newName == null || newName.trim().isEmpty()) {
+            throw new IllegalArgumentException("이름은 필수 입력 항목입니다.");
+        }
+        if (newEmail == null || newEmail.trim().isEmpty()) {
+            throw new IllegalArgumentException("이메일은 필수 입력 항목입니다.");
+        }
+        if (!user.getEmail().equals(newEmail)) {
+            userRepository.findByEmail(newEmail).ifPresent(existingUser -> {
+                throw new DuplicateEmailException(newEmail);
+            });
+        }
 
         user.setName(newName);
         user.setRole(newRole);

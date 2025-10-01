@@ -4,6 +4,7 @@ import elice.yeardreamback.oauth.dto.CustomOAuth2User;
 import elice.yeardreamback.user.dto.LoginUserResponse;
 import elice.yeardreamback.user.dto.UpdateUserRequest;
 import elice.yeardreamback.user.entity.User;
+import elice.yeardreamback.user.exception.UnauthorizedUserAccessException;
 import elice.yeardreamback.user.exception.UserNotAuthenticatedException;
 import elice.yeardreamback.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -99,6 +100,16 @@ public class UserController {
                                     mediaType = "application/json", schema = @Schema(implementation = User.class)))})
     @PatchMapping("/{username}")
     public User updateUser(@PathVariable String username, @RequestBody UpdateUserRequest updateUserRequest) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UserNotAuthenticatedException("수정 권한을 확인하기 위해 인증이 필요합니다.");
+        }
+        String currentUsername = authentication.getName();
+        if (!currentUsername.equals(username)) {
+            throw new UnauthorizedUserAccessException("다른 사용자의 정보를 수정할 수 없습니다.");
+        }
+
         return userService.updateUser(
                 username,
                 updateUserRequest.getName(),

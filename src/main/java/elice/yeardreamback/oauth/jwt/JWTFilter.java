@@ -31,6 +31,17 @@ public class JWTFilter extends OncePerRequestFilter {
         this.jwtUtil = jwtUtil;
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+
+        // 로그인, 회원가입, 토큰 재발급, Swagger 관련 경로는 필터링하지 않음
+        if (path.startsWith("/v3/api-docs/swagger-ui") || path.startsWith("/login")) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 필터링 로직을 구현합니다.
      */

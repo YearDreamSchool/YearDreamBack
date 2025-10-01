@@ -1,9 +1,13 @@
 package elice.yeardreamback.user.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
  * 데이터베이스에서 요청된 사용자(User)를 찾을 수 없을 때 발생하는 커스텀 런타임 예외입니다.
  * 이 예외는 보통 HTTP 404 Not Found 응답을 반환하는 데 사용됩니다.
  */
+@ResponseStatus(HttpStatus.NOT_FOUND)
 public class UserNotFoundException extends RuntimeException {
 
     /**

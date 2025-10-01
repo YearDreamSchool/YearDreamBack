@@ -5,8 +5,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.security.*;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.springframework.context.annotation.Bean;
@@ -114,15 +113,60 @@ public class SwaggerConfig {
      */
     private Components createComponents() {
         return new Components()
+                // JWT Bearer 인증
                 .addSecuritySchemes("bearerAuth", new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP)
                         .scheme("bearer")
                         .bearerFormat("JWT")
+                        .in(SecurityScheme.In.HEADER)
+                        .name("Authorization")
                         .description("JWT 토큰을 사용한 인증. Authorization 헤더에 'Bearer {token}' 형식으로 입력하세요."))
-                .addSecuritySchemes("oauth2", new SecurityScheme()
+
+                // Google OAuth2
+                .addSecuritySchemes("googleOAuth2", new SecurityScheme()
                         .type(SecurityScheme.Type.OAUTH2)
-                        .description("OAuth2 소셜 로그인 (Google, Naver, Kakao)"));
+                        .flows(new OAuthFlows()
+                                .authorizationCode(new OAuthFlow()
+                                        .authorizationUrl("https://accounts.google.com/o/oauth2/v2/auth")
+                                        .tokenUrl("https://oauth2.googleapis.com/token")
+                                        .scopes(new Scopes()
+                                                .addString("profile", "프로필 정보 접근")
+                                                .addString("email", "이메일 정보 접근")
+                                        )
+                                )
+                        )
+                )
+
+                // Naver OAuth2
+                .addSecuritySchemes("naverOAuth2", new SecurityScheme()
+                        .type(SecurityScheme.Type.OAUTH2)
+                        .flows(new OAuthFlows()
+                                .authorizationCode(new OAuthFlow()
+                                        .authorizationUrl("https://nid.naver.com/oauth2.0/authorize")
+                                        .tokenUrl("https://nid.naver.com/oauth2.0/token")
+                                        .scopes(new Scopes()
+                                                .addString("name", "사용자 이름 접근")
+                                                .addString("email", "이메일 접근")
+                                        )
+                                )
+                        )
+                )
+
+                // Kakao OAuth2
+                .addSecuritySchemes("kakaoOAuth2", new SecurityScheme()
+                        .type(SecurityScheme.Type.OAUTH2)
+                        .flows(new OAuthFlows()
+                                .authorizationCode(new OAuthFlow()
+                                        .authorizationUrl("https://kauth.kakao.com/oauth/authorize")
+                                        .tokenUrl("https://kauth.kakao.com/oauth/token")
+                                        .scopes(new Scopes()
+                                                .addString("account_email", "사용자 이메일 접근")
+                                        )
+                                )
+                        )
+                );
     }
+
 
     /**
      * 보안 요구사항 설정

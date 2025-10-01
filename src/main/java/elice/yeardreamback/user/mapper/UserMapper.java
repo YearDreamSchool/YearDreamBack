@@ -3,6 +3,7 @@ package elice.yeardreamback.user.mapper;
 import elice.yeardreamback.user.dto.UserDTO;
 import elice.yeardreamback.user.entity.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
@@ -27,5 +28,8 @@ public interface UserMapper {
      * @param userDTO 변환할 UserDTO
      * @return User 엔티티
      */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     User toEntity(UserDTO userDTO);
 }

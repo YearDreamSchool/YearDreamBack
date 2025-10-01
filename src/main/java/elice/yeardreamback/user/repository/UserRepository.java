@@ -3,6 +3,7 @@ package elice.yeardreamback.user.repository;
 import elice.yeardreamback.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
 
 /**
@@ -18,4 +19,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * 사용자가 존재하지 않으면 Optional.empty()를 반환합니다.
      */
     Optional<User> findByUsername(String username);
+
+    /**
+     * 이메일(email)을 기준으로 User 엔티티를 조회합니다.
+     * @param email
+     * @return 주어진 email과 일치하는 User 엔티티를 담는 Optional 객체.
+     */
+    Optional<User> findByEmail(String email);
 }
