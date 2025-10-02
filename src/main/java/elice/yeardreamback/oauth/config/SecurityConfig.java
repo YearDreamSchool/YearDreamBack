@@ -118,6 +118,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/login/**",
+                                "/api/token/google",
                                 "/ws/**",
                                 "/h2-console/**",
                                 "/swagger-ui/**",

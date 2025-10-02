@@ -38,4 +38,8 @@ public class UpdateUserRequest {
      * 수정할 사용자의 전화번호입니다. (예: "010-1234-5678")
      */
     private String phone;
+
+    public UpdateUserRequest() {
+
+    }
 }
