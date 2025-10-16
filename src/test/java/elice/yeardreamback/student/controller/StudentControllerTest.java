@@ -21,6 +21,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -141,4 +142,38 @@ class StudentControllerTest {
         assertEquals(mockResponses, result);
         assertEquals(newStatusEnum.name(), result.get(0).getStatus().name());
     }
+
+    // --- 3. WebSocket Handler 테스트: updateAllAttendance ---
+    @Test
+    @DisplayName("WebSocket 핸들러 - 전체 출결 상태 업데이트 서비스 호출 및 응답 검증")
+    void updateAllAttendance_ServiceCallVerification() {
+        // Given: 전체 학생 상태 리스트
+        StudentResponse s1 = createMockStudent("김철수", 1, StudentStatus.PRESENT);
+        StudentResponse s2 = createMockStudent("이영희", 2, StudentStatus.LATE);
+        StudentResponse s3 = createMockStudent("박민수", 3, null); // 상태가 null인 학생
+
+        List<StudentResponse> inputStudents = List.of(s1, s2, s3);
+
+        // Mock findAll 반환값
+        when(studentService.findAll()).thenReturn(List.of(s1, s2, s3));
+
+        // When: 컨트롤러 메서드 직접 호출
+        List<StudentResponse> result = studentController.updateAllAttendance(inputStudents);
+
+        // Then: 상태가 null이 아닌 학생만 updateStatus 호출
+        verify(studentService, times(1)).updateStatus(eq(1), eq(StudentStatus.PRESENT), any(LocalDateTime.class));
+        verify(studentService, times(1)).updateStatus(eq(2), eq(StudentStatus.LATE), any(LocalDateTime.class));
+        // 상태가 null인 학생은 호출되지 않음
+        verify(studentService, never()).updateStatus(eq(3), any(), any(LocalDateTime.class));
+
+        // findAll이 호출되어 결과 반환
+        verify(studentService, times(1)).findAll();
+
+        // 반환 값 검증
+        assertEquals(3, result.size());
+        assertEquals(StudentStatus.PRESENT, result.get(0).getStatus());
+        assertEquals(StudentStatus.LATE, result.get(1).getStatus());
+        assertNull(result.get(2).getStatus());
+    }
+
 }
