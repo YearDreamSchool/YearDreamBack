@@ -86,3 +86,8 @@ configurations {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+tasks.named('bootJar') {
+    // 중복 파일이 발견되면, 빌드를 실패시키는 대신 첫 번째 파일을 사용하도록 설정
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
