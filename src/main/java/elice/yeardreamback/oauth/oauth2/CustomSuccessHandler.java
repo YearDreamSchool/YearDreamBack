@@ -72,6 +72,11 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         // 6. Access Token을 쿼리 파라미터로 포함하여 클라이언트(프론트엔드)로 리다이렉트
         String redirectUrl = "http://localhost:3000/oauth/redirect?token=" + accessToken;
+
+        // 6-1. Swagger UI에서 테스트할 때는 아래 URL로 리다이렉트
+        String swaggerRedirectUrl = "http://localhost:8080/v3/api-docs/swagger-ui/oauth-redirect.html?token=" + accessToken;
+
+
         response.sendRedirect(redirectUrl);
     }
 }

@@ -2,6 +2,7 @@ package elice.yeardreamback.student.controller;
 
 import elice.yeardreamback.student.dto.AttendanceMessage;
 import elice.yeardreamback.student.dto.StudentResponse;
+import elice.yeardreamback.student.enums.StudentStatus;
 import elice.yeardreamback.student.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -83,6 +84,31 @@ public class StudentController {
         studentService.updateStatus(message.getSeatNum(), message.getNewStatus(), updatedAt);
 
         // 업데이트된 전체 목록을 다시 조회하여 STOMP 채널로 반환 (브로드캐스트)
+        return studentService.findAll();
+    }
+
+    // ---------------------------
+    // 전체 출결 상태 업데이트 (WebSocket)
+    // ---------------------------
+    @Operation(summary = "실시간 출결 상태 업데이트 (전체)",
+            description = "클라이언트에서 전체 상태를 변경, 모든 학생 상태 브로드캐스트")
+    @MessageMapping("/attendance.updateAll")
+    @SendTo("/topic/attendance")
+    public List<StudentResponse> updateAllAttendance(List<StudentResponse> students) {
+        LocalDateTime now = LocalDateTime.now();
+
+        for (StudentResponse student : students) {
+            StudentStatus statusStr = student.getStatus();
+            if (statusStr == null) continue;
+
+            try {
+                StudentStatus status = StudentStatus.valueOf(statusStr.name());
+                studentService.updateStatus(student.getSeat(), status, now);
+            } catch (IllegalArgumentException e) {
+                System.err.println("Invalid StudentStatus: " + statusStr);
+            }
+        }
+
         return studentService.findAll();
     }
 }
