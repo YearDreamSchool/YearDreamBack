@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: yeardream-back:latest
+    container_name: yeardream-app
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    environment:
+      # Spring Boot 환경설정 (환경변수는 .env에서 주입)
+      SPRING_PROFILES_ACTIVE: "${SPRING_PROFILES_ACTIVE:-prod}"
+      SPRING_DATASOURCE_URL: "${SPRING_DATASOURCE_URL:-jdbc:mysql://db:3306/${MYSQL_DATABASE:-yeardream}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}"
+      SPRING_DATASOURCE_USERNAME: "${SPRING_DATASOURCE_USERNAME:-${MYSQL_USER:-yeardream}}"
+      SPRING_DATASOURCE_PASSWORD: "${SPRING_DATASOURCE_PASSWORD:-${MYSQL_PASSWORD:-yeardreampass}}"
+      SPRING_REDIS_HOST: "${SPRING_REDIS_HOST:-redis}"
+
+      # JWT secret: 기본값을 .env의 JWT_SECRET으로 읽음
+      SPRING_JWT_SECRET: "${SPRING_JWT_SECRET:-${JWT_SECRET:-change-me}}"
+
+      # OAuth 클라이언트 정보 (있으면 .env에서 주입)
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
+      KAKAO_CLIENT_ID: "${KAKAO_CLIENT_ID:-}"
+      KAKAO_CLIENT_SECRET: "${KAKAO_CLIENT_SECRET:-}"
+      NAVER_CLIENT_ID: "${NAVER_CLIENT_ID:-}"
+      NAVER_CLIENT_SECRET: "${NAVER_CLIENT_SECRET:-}"
+
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: yeardream-db
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-rootpassword}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE:-yeardream}"
+      MYSQL_USER: "${MYSQL_USER:-yeardream}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-yeardreampass}"
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: yeardream-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  db_data: {}
+  redis_data: {}
