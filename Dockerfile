@@ -21,6 +21,6 @@ COPY src/main/resources/bootsecurity.p12 ./bootsecurity.p12
 
 ENV TZ=Asia/Seoul
 
-EXPOSE 8443
+EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

@@ -9,6 +9,8 @@ services:
     container_name: yeardream-app
     env_file:
       - .env
+    ports:
+      - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: "prod"
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/yeardream?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
