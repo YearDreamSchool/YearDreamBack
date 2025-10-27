@@ -25,7 +25,6 @@ public class CorsMvcConfig implements WebMvcConfigurer {
                 .exposedHeaders("Set-Cookie")
 
                 // 3. 리소스 접근을 허용할 출처(Origin)를 지정합니다.
-                // 프론트엔드 서버의 주소인 http://localhost:3000을 허용합니다.
                 // 배포시에는 실제 도메인을 사용합니다.
                 .allowedOrigins("https://yeardream.site")
 
