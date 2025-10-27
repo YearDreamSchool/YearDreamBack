@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -22,6 +23,9 @@ import java.util.Iterator;
  */
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    @Value("${app.oauth2.frontendRedirectUri}")
+    private String frontendRedirectUri;
 
     private final JWTUtil jwtUtil;
 
@@ -71,7 +75,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addCookie(refreshCookie);
 
         // 6. Access Token을 쿼리 파라미터로 포함하여 클라이언트(프론트엔드)로 리다이렉트
-        String redirectUrl = "http://localhost:3000/oauth/redirect?token=" + accessToken;
+        String redirectUrl = frontendRedirectUri + "?token=" + accessToken;
 
         // 6-1. Swagger UI에서 테스트할 때는 아래 URL로 리다이렉트
         String swaggerRedirectUrl = "http://localhost:8080/v3/api-docs/swagger-ui/oauth-redirect.html?token=" + accessToken;
