@@ -10,13 +10,14 @@ services:
     env_file:
       - .env
     ports:
-      - "8080:8080"
+      - "8443:8443"
     environment:
       # Spring Boot 환경변수 매핑
       SPRING_PROFILES_ACTIVE: "dev"
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/yeardream?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      ROOT_URL: https://yeardream.codns.com:8443
       SPRING_REDIS_HOST: redis
       SPRING_JWT_SECRET: ${JWT_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
