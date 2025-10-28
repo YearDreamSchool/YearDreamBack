@@ -62,12 +62,12 @@ public class SecurityConfig {
 
                         CorsConfiguration configuration = new CorsConfiguration();
 
-			configuration.setAllowedOrigins(Arrays.asList(
-   			    "https://yeardream.codns.com",
-    			    "https://yeardream.site",
+                        configuration.setAllowedOrigins(Arrays.asList(
+                            "https://yeardream.codns.com",
+                            "https://yeardream.site",
                             "http://localhost:3000"
-			));
-                        configuration.setAllowedMethods(Collections.singletonList("*"));
+                        ));
+                        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setMaxAge(3600L);
