@@ -155,7 +155,7 @@ public class UserController {
 
         Cookie deleteCookie = new Cookie("refreshToken", null);
         deleteCookie.setHttpOnly(true);
-        deleteCookie.setSecure(false);
+        deleteCookie.setSecure(true);
         deleteCookie.setPath("/");
         deleteCookie.setMaxAge(0);
         response.addCookie(deleteCookie);
