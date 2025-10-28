@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import javax.lang.model.type.ArrayType;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -73,7 +74,7 @@ public class SecurityConfig {
                         configuration.setMaxAge(3600L);
 
                         // 클라이언트가 응답에서 접근할 수 있도록 Authorization 헤더 노출
-                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+                        configuration.setExposedHeaders(Arrays.asList("Authorization"));
 
                         return configuration;
                     }

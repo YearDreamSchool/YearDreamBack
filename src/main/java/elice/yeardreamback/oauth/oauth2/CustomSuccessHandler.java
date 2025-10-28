@@ -73,15 +73,15 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // 5. Refresh Token을 HTTP Only 쿠키에 저장
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(false); // 로컬 테스트 시 false, 운영 시 true
+        refreshCookie.setSecure(true); // 로컬 테스트 시 false, 운영 시 true
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge((int) (refreshExpiredMs / 1000));
         response.addCookie(refreshCookie);
         log.info("RefreshToken 쿠키 설정 완료: {}", refreshCookie);
 
         // 6. Access Token을 쿼리 파라미터로 포함하여 클라이언트(프론트엔드)로 리다이렉트
-        String redirectUri = "https://yeardream.site/oauth2/redirect";
-//        String redirectUri = "http://localhost:3000/oauth2/redirect";
+        String redirectUri = "https://yeardream.site";
+//        String redirectUri = "http://localhost:3000";
         log.info("Redirect URI: {}", redirectUri);
 
 
