@@ -44,7 +44,7 @@ spring:
             client-name: google
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: ${ROOT_URL}/login/oauth2/code/google
+            redirect-uri: https://yeardream.site/login/oauth2/code/google
             authorization-grant-type: authorization_code
             scope:
               - profile
@@ -114,3 +114,5 @@ springdoc:
 server:
   port: 8080
   forward-headers-strategy: native
+  ssl:
+    enabled: false
