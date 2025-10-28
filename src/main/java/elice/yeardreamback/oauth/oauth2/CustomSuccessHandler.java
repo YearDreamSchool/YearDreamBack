@@ -1,7 +1,9 @@
 package elice.yeardreamback.oauth.oauth2;
 
 import elice.yeardreamback.oauth.dto.CustomOAuth2User;
+import elice.yeardreamback.oauth.entity.RefreshToken;
 import elice.yeardreamback.oauth.jwt.JWTUtil;
+import elice.yeardreamback.oauth.repository.RefreshRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +29,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final JWTUtil jwtUtil;
     private final OAuth2Properties oAuth2Properties;
+    private RefreshRepository refreshRepository;
 
     /**
      * 의존성 주입을 위한 생성자입니다.
@@ -70,22 +73,30 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String refreshToken = jwtUtil.createJwt("refresh", username, role, name, refreshExpiredMs);
         log.info("JWT 생성 완료 - accessToken: {}, refreshToken: {}", accessToken, refreshToken);
 
+        RefreshToken tokenEntity = new RefreshToken();
+        tokenEntity.setUsername(username);
+        tokenEntity.setRefresh(refreshToken);
+        tokenEntity.setExpiration(String.valueOf(System.currentTimeMillis() + refreshExpiredMs));
+        refreshRepository.save(tokenEntity);
+
+
         // 5. Refresh Token을 HTTP Only 쿠키에 저장
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(true); // 로컬 테스트 시 false, 운영 시 true
+        refreshCookie.setSecure(true);
         refreshCookie.setPath("/");
-
-        refreshCookie.setDomain("yeardream.site");
-
         refreshCookie.setMaxAge((int) (refreshExpiredMs / 1000));
         response.addCookie(refreshCookie);
         log.info("RefreshToken 쿠키 설정 완료: {}", refreshCookie);
+
+        refreshCookie.setDomain("yeardream.codns.com");
 
         // 6. Access Token을 쿼리 파라미터로 포함하여 클라이언트(프론트엔드)로 리다이렉트
         String redirectUri = "https://yeardream.site";
 //        String redirectUri = "http://localhost:3000";
         log.info("Redirect URI: {}", redirectUri);
+        // 쿠키 확인
+        log.info("RefreshToken 값: {}", refreshCookie.getValue());
 
 
         response.sendRedirect(redirectUri + "?token=" + accessToken);
