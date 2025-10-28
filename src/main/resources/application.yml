@@ -106,7 +106,7 @@ springdoc:
   app:
     oauth2:
 #      frontendRedirectUri: http://localhost:3000/oauth2/redirect
-      frontendRedirectUri: https://yeardream.site/oauth/redirect
+      frontendRedirectUri: https://yeardream.site/oauth2/redirect
 
 server:
   port: 8080
