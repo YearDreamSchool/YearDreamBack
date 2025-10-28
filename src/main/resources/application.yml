@@ -44,7 +44,7 @@ spring:
             client-name: google
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: https://yeardream.site/login/oauth2/code/google
+            redirect-uri: ${ROOT_URL}/login/oauth2/code/google
             authorization-grant-type: authorization_code
             scope:
               - profile
@@ -105,11 +105,9 @@ springdoc:
 
   app:
     oauth2:
-      authorizedRedirectUris:
-  #      - http://localhost:3000/oauth/redirect
-        - https://yeardream.site/oauth/redirect
-        - https://yeardream.codns.com/v3/api-docs/swagger-ui/oauth2-redirect.html
-      frontendRedirectUri: https://yeardream.site/oauth/redirect
+      frontendRedirectUri: http://localhost:3000/oauth2/redirect
+#        - https://yeardream.codns.com/v3/api-docs/swagger-ui/oauth2-redirect.html
+#      frontendRedirectUri: https://yeardream.site/oauth/redirect
 
 server:
   port: 8080

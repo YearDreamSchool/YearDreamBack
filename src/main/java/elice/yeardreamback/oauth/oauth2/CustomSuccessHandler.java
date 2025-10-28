@@ -7,7 +7,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -26,17 +25,17 @@ import java.util.Iterator;
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    @Value("${app.oauth2.frontendRedirectUri}")
-    private String frontendRedirectUri;
-
     private final JWTUtil jwtUtil;
+    private final OAuth2Properties oAuth2Properties;
 
     /**
      * 의존성 주입을 위한 생성자입니다.
      * @param jwtUtil JWT 토큰 생성 및 처리 유틸리티
+     * @param oAuth2Properties OAuth2 관련 설정 프로퍼티
      */
-    public CustomSuccessHandler(JWTUtil jwtUtil) {
+    public CustomSuccessHandler(JWTUtil jwtUtil, OAuth2Properties oAuth2Properties) {
         this.jwtUtil = jwtUtil;
+        this.oAuth2Properties = oAuth2Properties;
     }
 
     /**
@@ -44,45 +43,50 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
      */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        log.info("CustomSuccessHandler 진입");
-        // 1. Authentication 객체에서 CustomOAuth2User 객체를 추출합니다.
+        log.info("===== CustomSuccessHandler 진입 =====");
+
+        // 1. Authentication 객체에서 CustomOAuth2User 객체 추출
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+        log.info("OAuth2User 추출 완료: {}", customOAuth2User);
 
         String username = customOAuth2User.getUsername();
         String name = customOAuth2User.getName();
+        log.info("사용자 정보 - username: {}, name: {}", username, name);
 
-        // 2. 권한(Role) 정보를 추출합니다.
+        // 2. 권한(Role) 정보 추출
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-        GrantedAuthority auth = iterator.next(); // 첫 번째 권한만 사용
-        String role = auth.getAuthority();
+        GrantedAuthority auth = iterator.hasNext() ? iterator.next() : null;
+        String role = (auth != null) ? auth.getAuthority() : "ROLE_USER";
+        log.info("권한(Role) 정보: {}", role);
 
         // 3. 토큰 만료 시간 설정
-        // 액세스 토큰: 30초
         long accessExpiredMs = 30 * 1000L;
-        // 리프레시 토큰: 7일
         long refreshExpiredMs = 7 * 24 * 60 * 60 * 1000L;
+        log.info("토큰 만료 설정 - access: {}ms, refresh: {}ms", accessExpiredMs, refreshExpiredMs);
 
         // 4. Access Token 및 Refresh Token 생성
         String accessToken = jwtUtil.createJwt("access", username, role, name, accessExpiredMs);
         String refreshToken = jwtUtil.createJwt("refresh", username, role, name, refreshExpiredMs);
+        log.info("JWT 생성 완료 - accessToken: {}, refreshToken: {}", accessToken, refreshToken);
 
         // 5. Refresh Token을 HTTP Only 쿠키에 저장
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
-        refreshCookie.setHttpOnly(true); // 💡 XSS 공격 방지를 위해 JavaScript 접근 차단
-        refreshCookie.setSecure(true);  // 💡 HTTPS 환경이 아니라면 false (운영 시 true 권장)
-        refreshCookie.setPath("/");      // 💡 모든 경로에서 쿠키 접근 가능
-        // MaxAge를 밀리초에서 초 단위로 변환
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(false); // 로컬 테스트 시 false, 운영 시 true
+        refreshCookie.setPath("/");
         refreshCookie.setMaxAge((int) (refreshExpiredMs / 1000));
         response.addCookie(refreshCookie);
+        log.info("RefreshToken 쿠키 설정 완료: {}", refreshCookie);
 
         // 6. Access Token을 쿼리 파라미터로 포함하여 클라이언트(프론트엔드)로 리다이렉트
-        String redirectUrl = frontendRedirectUri + "?token=" + accessToken;
+//        String redirectUri = oAuth2Properties.getFrontendRedirectUri();
+        String redirectUri = "http://localhost:3000/oauth2/redirect";
+        log.info("Redirect URI: {}", redirectUri);
 
-        // 6-1. Swagger UI에서 테스트할 때는 아래 URL로 리다이렉트
-        String swaggerRedirectUrl = "http://localhost:8080/v3/api-docs/swagger-ui/oauth-redirect.html?token=" + accessToken;
 
-
-        response.sendRedirect(redirectUrl);
+        response.sendRedirect(redirectUri + "?token=" + accessToken);
+        log.info("리다이렉트 완료: {}?token={}", redirectUri, accessToken);
     }
+
 }

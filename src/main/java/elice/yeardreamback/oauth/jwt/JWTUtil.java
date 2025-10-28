@@ -21,7 +21,7 @@ public class JWTUtil {
 
     /**
      * SecretKey를 주입받아 초기화합니다.
-     * @param secret application.yml 또는 환경 변수에서 주입받은 비밀 문자열
+     * @param secret application-dev.yml 또는 환경 변수에서 주입받은 비밀 문자열
      */
     public JWTUtil(@Value("${spring.jwt.secret}")String secret) {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
