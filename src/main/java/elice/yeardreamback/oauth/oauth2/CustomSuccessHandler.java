@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,6 +22,7 @@ import java.util.Iterator;
  * 인증된 사용자 정보를 기반으로 JWT(Access Token 및 Refresh Token)를 생성하고,
  * 클라이언트로 리다이렉트합니다.
  */
+@Slf4j
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -42,7 +44,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
      */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-
+        log.info("CustomSuccessHandler 진입");
         // 1. Authentication 객체에서 CustomOAuth2User 객체를 추출합니다.
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
