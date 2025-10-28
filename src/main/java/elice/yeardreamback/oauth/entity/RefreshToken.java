@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.Setter;
 
 
 /**
@@ -11,6 +13,8 @@ import jakarta.persistence.Id;
  * 이 토큰은 Access Token이 만료되었을 때 새로운 Access Token을 발급받는 데 사용되며,
  * 보안을 위해 데이터베이스에 저장되어 관리됩니다.
  */
+@Getter
+@Setter
 @Entity
 public class RefreshToken {
 
