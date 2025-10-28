@@ -75,6 +75,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(true); // 로컬 테스트 시 false, 운영 시 true
         refreshCookie.setPath("/");
+
+        refreshCookie.setDomain("https://yeardream.site");
+
         refreshCookie.setMaxAge((int) (refreshExpiredMs / 1000));
         response.addCookie(refreshCookie);
         log.info("RefreshToken 쿠키 설정 완료: {}", refreshCookie);
