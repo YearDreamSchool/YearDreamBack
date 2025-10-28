@@ -1,5 +1,6 @@
 package elice.yeardreamback.user.service.impl;
 
+import elice.yeardreamback.oauth.repository.RefreshRepository;
 import elice.yeardreamback.user.entity.User;
 import elice.yeardreamback.user.exception.DuplicateEmailException;
 import elice.yeardreamback.user.exception.UserNotFoundException;
@@ -20,15 +21,17 @@ public class UserServiceImpl implements UserService {
 
     private final TokenServiceImpl tokenServiceImpl;
     private final UserRepository userRepository;
+    private final RefreshRepository refreshRepository;
 
     /**
      * 의존성 주입을 위한 생성자입니다.
      * @param tokenServiceImpl 토큰 관련 서비스 (주로 Refresh Token 무효화에 사용)
      * @param userRepository 사용자 엔티티 데이터 접근 리포지토리
      */
-    public UserServiceImpl(TokenServiceImpl tokenServiceImpl, UserRepository userRepository) {
+    public UserServiceImpl(TokenServiceImpl tokenServiceImpl, UserRepository userRepository, RefreshRepository refreshRepository) {
         this.tokenServiceImpl = tokenServiceImpl;
         this.userRepository = userRepository;
+        this.refreshRepository = refreshRepository;
     }
 
     /**
@@ -81,10 +84,19 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 리프레시 토큰(혹은 액세스 토큰)을 무효화하여 사용자를 로그아웃 처리합니다.
-     * @param token 무효화할 토큰 (보통 클라이언트에서 전달받은 리프레시 토큰)
+     * 사용자를 로그아웃 처리합니다. DB에 저장된 리프레시 토큰을 삭제합니다.
+     * @param username 로그아웃할 사용자의 username
      */
-    public void logoutUser(String token) {
-        tokenServiceImpl.invalidateToken(token);
+    @Transactional
+    public void logoutUser(String username) {
+        refreshRepository.deleteByUsername(username);
+    }
+
+    /**
+     * 리프레시 토큰을 username으로 조회합니다.
+     * @param
+     */
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }

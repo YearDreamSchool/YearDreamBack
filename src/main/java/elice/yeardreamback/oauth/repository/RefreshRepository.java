@@ -13,6 +13,12 @@ import org.springframework.stereotype.Repository;
 public interface RefreshRepository extends JpaRepository<RefreshToken, Integer> {
 
     /**
+     * 주어진 사용자 이름(username)에 해당하는 Refresh Token 엔티티를 데이터베이스에서 조회합니다.
+     * @param username 조회할 사용자의 고유 이름
+     */
+    RefreshToken findByUsername(String username);
+
+    /**
      * 주어진 Refresh Token 문자열(refresh)을 가진 엔티티가 데이터베이스에 존재하는지 확인합니다.
      * @param refresh 검증할 Refresh Token 문자열
      * @return 존재하면 true, 아니면 false
@@ -26,4 +32,11 @@ public interface RefreshRepository extends JpaRepository<RefreshToken, Integer> 
      */
     @Transactional
     void deleteByRefresh(String refresh);
+
+    /**
+     * 주어진 사용자 이름(username)에 해당하는 Refresh Token 엔티티를 데이터베이스에서 삭제합니다.
+     * @param username 삭제할 토큰을 소유한 사용자의 고유 이름
+     */
+    @Transactional
+    void deleteByUsername(String username);
 }

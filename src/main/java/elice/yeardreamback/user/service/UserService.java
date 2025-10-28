@@ -34,8 +34,13 @@ public interface UserService {
     User updateUser(String username, String newName, String newRole, String newEmail, String newProfileImageUrl, String newPhone);
 
     /**
-     * 주어진 토큰(일반적으로 Refresh Token)을 무효화하여 사용자를 로그아웃 처리합니다.
-     * @param token 무효화할 토큰 문자열
+     * 주어진 사용자 이름(username)을 가진 사용자를 로그아웃 처리합니다.
+     * @param username 로그아웃할 사용자의 고유 식별자
      */
-    void logoutUser(String token);
+    void logoutUser(String username);
+
+    /**
+     * 리프레시 토큰을 username으로 검색합니다.
+     */
+    Optional<User> findByUsername(String username);
 }
