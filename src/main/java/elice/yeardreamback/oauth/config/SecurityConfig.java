@@ -36,6 +36,11 @@ public class SecurityConfig {
         this.jwtUtil = jwtUtil;
     }
 
+    @Bean
+    public JWTFilter jwtFilter() {
+        return new JWTFilter(jwtUtil);
+    }
+
     /**
      * Spring Security의 필터 체인을 구성하는 핵심 Bean입니다.
      */
@@ -57,6 +62,7 @@ public class SecurityConfig {
                         CorsConfiguration configuration = new CorsConfiguration();
 
                         configuration.setAllowedOrigins(Collections.singletonList("https://yeardream.site"));
+                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -96,7 +102,7 @@ public class SecurityConfig {
          * JWT 필터를 UsernamePasswordAuthenticationFilter 전에 추가합니다.
          */
         http
-                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
 
         /**
          * OAUTH2 로그인 설정입니다.

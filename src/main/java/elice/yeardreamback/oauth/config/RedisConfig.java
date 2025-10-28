@@ -9,7 +9,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
  * Redis 데이터베이스 연결 및 RedisTemplate 설정을 정의하는 클래스입니다.
- * application.yml 파일의 spring.data.redis.* 설정을 기반으로 연결을 구성합니다.
+ * application-dev.yml 파일의 spring.data.redis.* 설정을 기반으로 연결을 구성합니다.
  */
 @Configuration
 public class RedisConfig {
