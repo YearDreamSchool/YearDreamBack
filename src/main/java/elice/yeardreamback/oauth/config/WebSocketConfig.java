@@ -40,7 +40,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
          * 4. AuthHandshakeInterceptor를 추가하여 JWT를 검증하는 인터셉터를 추가합니다.
          */
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("http://localhost:3000")
+                .setAllowedOriginPatterns("http://localhost:3000", "https://yeardream.site")
                 .withSockJS()
                 .setInterceptors(new AuthHandshakeInterceptor(jwtUtil)); // 여기서 JWT 체크
     }

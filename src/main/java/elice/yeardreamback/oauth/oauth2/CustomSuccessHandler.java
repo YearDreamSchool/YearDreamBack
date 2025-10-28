@@ -80,8 +80,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         log.info("RefreshToken 쿠키 설정 완료: {}", refreshCookie);
 
         // 6. Access Token을 쿼리 파라미터로 포함하여 클라이언트(프론트엔드)로 리다이렉트
-//        String redirectUri = oAuth2Properties.getFrontendRedirectUri();
-        String redirectUri = "http://localhost:3000/oauth2/redirect";
+        String redirectUri = "https://yeardream.site/oauth2/redirect";
+//        String redirectUri = "http://localhost:3000/oauth2/redirect";
         log.info("Redirect URI: {}", redirectUri);
 
 
