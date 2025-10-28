@@ -36,9 +36,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
      * @param jwtUtil JWT 토큰 생성 및 처리 유틸리티
      * @param oAuth2Properties OAuth2 관련 설정 프로퍼티
      */
-    public CustomSuccessHandler(JWTUtil jwtUtil, OAuth2Properties oAuth2Properties) {
+    public CustomSuccessHandler(JWTUtil jwtUtil, OAuth2Properties oAuth2Properties, RefreshRepository refreshRepository) {
         this.jwtUtil = jwtUtil;
         this.oAuth2Properties = oAuth2Properties;
+        this.refreshRepository = refreshRepository;
     }
 
     /**
