@@ -43,6 +43,7 @@ out/
 
 .kiro/
 
+!application.yml
 !docker-compose.yml
 
 nginx/cert/
