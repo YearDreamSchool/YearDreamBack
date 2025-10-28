@@ -105,9 +105,8 @@ springdoc:
 
   app:
     oauth2:
-      frontendRedirectUri: http://localhost:3000/oauth2/redirect
-#        - https://yeardream.codns.com/v3/api-docs/swagger-ui/oauth2-redirect.html
-#      frontendRedirectUri: https://yeardream.site/oauth/redirect
+#      frontendRedirectUri: http://localhost:3000/oauth2/redirect
+      frontendRedirectUri: https://yeardream.site/oauth/redirect
 
 server:
   port: 8080
