@@ -140,7 +140,7 @@ public class UserController {
     public ResponseEntity<String> logoutUser(HttpServletRequest request, HttpServletResponse response, @RequestHeader("Authorization") String authorizationHeader) {
         // 쿠키에서 refresh token 가져오기
         Cookie[] cookies = request.getCookies();
-	log.info(Arrays.toString(request.getCookies()));
+	    log.info(Arrays.toString(request.getCookies()));
         String refreshToken = null;
         log.info("cookies: " + cookies);
         if (cookies != null) {
