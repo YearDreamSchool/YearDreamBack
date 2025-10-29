@@ -76,7 +76,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .secure(true)                       // HTTPS 전용
                 .path("/")                          // 전체 경로
                 .maxAge(Duration.ofDays(7))         // 7일
-                .domain(".yeardream.site")          // 서브도메인 포함 (api.yeardream.site, yeardream.site)
+                .domain(".yeardream.codns.com")       // 서브도메인 포함
 //                .domain(".localhost")               // 로컬 테스트용
                 .sameSite("None")                   // 크로스 사이트 허용 (필수!)
                 .build();
