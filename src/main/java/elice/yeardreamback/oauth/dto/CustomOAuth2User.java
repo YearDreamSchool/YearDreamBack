@@ -28,11 +28,16 @@ public class CustomOAuth2User implements OAuth2User {
     /**
      * OAuth2 공급자로부터 받은 원본 속성(attributes) 맵을 반환합니다.
      * 현재 구현에서는 사용하지 않으므로 null을 반환합니다.
-     * @return null
+     * @return 사용자 속성 맵
      */
     @Override
     public Map<String, Object> getAttributes() {
-        return null;
+        return Map.of(
+                "username", userDTO.getUsername(),
+                "name", userDTO.getName(),
+                "email", userDTO.getEmail(),
+                "role", userDTO.getRole()
+        );
     }
 
     /**
@@ -42,10 +47,8 @@ public class CustomOAuth2User implements OAuth2User {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-
         Collection<GrantedAuthority> collection = new ArrayList<>();
-
-        collection.add(new SimpleGrantedAuthority("ROLE_" + userDTO.getRole()));
+        collection.add(new SimpleGrantedAuthority(userDTO.getRole()));
         return collection;
     }
 
@@ -74,5 +77,13 @@ public class CustomOAuth2User implements OAuth2User {
      */
     public String getRole() {
         return userDTO.getRole();
+    }
+
+    /**
+     * 사용자의 이메일(Email) 정보를 반환합니다.
+     * @return 사용자의 이메일 주소
+     */
+    public String getEmail() {
+        return userDTO.getEmail();
     }
 }

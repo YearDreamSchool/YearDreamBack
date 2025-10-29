@@ -55,21 +55,16 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String username = customOAuth2User.getUsername();
         String name = customOAuth2User.getName();
-        log.info("사용자 정보 - username: {}, name: {}", username, name);
+        String role = customOAuth2User.getRole();
+        String email = customOAuth2User.getEmail();
+        log.info("사용자 정보 - username: {}, name: {}, role: {}, email: {}", username, name, role, email);
 
-        // 2. 권한(Role) 정보 추출
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-        GrantedAuthority auth = iterator.hasNext() ? iterator.next() : null;
-        String role = (auth != null) ? auth.getAuthority() : "ROLE_USER";
-        log.info("권한(Role) 정보: {}", role);
-
-        // 3. 토큰 만료 시간 설정
+        // 2. 토큰 만료 시간 설정
         long accessExpiredMs = 30 * 1000L;
         long refreshExpiredMs = 7 * 24 * 60 * 60 * 1000L;
         log.info("토큰 만료 설정 - access: {}ms, refresh: {}ms", accessExpiredMs, refreshExpiredMs);
 
-        // 4. Access Token 및 Refresh Token 생성
+        // 3. Access Token 및 Refresh Token 생성
         String accessToken = jwtUtil.createJwt("access", username, role, name, accessExpiredMs);
         String refreshToken = jwtUtil.createJwt("refresh", username, role, name, refreshExpiredMs);
         log.info("JWT 생성 완료 - accessToken: {}, refreshToken: {}", accessToken, refreshToken);
@@ -80,8 +75,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         tokenEntity.setExpiration(String.valueOf(System.currentTimeMillis() + refreshExpiredMs));
         refreshRepository.save(tokenEntity);
 
-
-        // 5. Refresh Token을 HTTP Only 쿠키에 저장
+        // 4. Refresh Token을 HTTP Only 쿠키에 저장
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(true);
@@ -90,9 +84,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addCookie(refreshCookie);
         log.info("RefreshToken 쿠키 설정 완료: {}", refreshCookie);
 
-	refreshCookie.setDomain("yeardream.codns.com");
+	    refreshCookie.setDomain("yeardream.codns.com");
+//        refreshCookie.setDomain("localhost");
 
-        // 6. Access Token을 쿼리 파라미터로 포함하여 클라이언트(프론트엔드)로 리다이렉트
+        // 5. Access Token을 쿼리 파라미터로 포함하여 클라이언트(프론트엔드)로 리다이렉트
         String redirectUri = "https://yeardream.site";
 //        String redirectUri = "http://localhost:3000";
         log.info("Redirect URI: {}", redirectUri);
