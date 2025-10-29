@@ -9,7 +9,19 @@ public enum UserRoleType {
      * COACH: 코치 권한을 가진 코치를 의미합니다.
      * USER: 일반 사용자 권한을 가진 교육생을 의미합니다.
      */
-    ADMIN, COACH, USER;
+    ROLE_ADMIN("시스템 관리자"),
+    ROLE_COACH("코치"),
+    ROLE_USER("일반 사용자");
+
+    private final String description;
+
+    /**
+     * 설명
+     * @param description
+     */
+    UserRoleType(String description) {
+        this.description = description;
+    }
 
     /**
      * Enum 상수의 이름을 문자열로 반환합니다.
