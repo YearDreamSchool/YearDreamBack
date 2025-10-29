@@ -4,12 +4,15 @@ import elice.yeardreamback.oauth.dto.*;
 import elice.yeardreamback.user.dto.UserDTO;
 import elice.yeardreamback.user.entity.User;
 import elice.yeardreamback.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 /**
  * Spring Security OAuth2의 사용자 정보를 로드하는 커스텀 서비스입니다.
@@ -36,6 +39,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * @throws OAuth2AuthenticationException 인증 과정 중 오류 발생 시 예외 발생
      */
     @Override
+    @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
@@ -51,33 +55,35 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String username = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
 
-        // 1. username으로 조회 → 있으면 UPDATE, 없으면 INSERT
-        User user = userRepository.findByUsername(username)
-                .orElseGet(() -> {
-                    log.info("신규 사용자 생성: {}", username);
-                    User newUser = new User();
-                    newUser.setUsername(username);
-                    newUser.setName(oAuth2Response.getName());
-                    newUser.setEmail(oAuth2Response.getEmail());
-                    newUser.setRole("ROLE_USER");  // 신규 사용자만 ROLE_USER
-                    return userRepository.save(newUser);
-                });
+        // 1. 기존 사용자 조회
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        User user;
 
-        // 2. 기존 사용자면 최신 정보 업데이트 (role은 건드리지 않음!)
-        if (user.getId() != null) {  // 이미 DB에 있는 경우
-            log.info("기존 사용자 업데이트: {} (role 유지: {})", username, user.getRole());
-            user.setName(oAuth2Response.getName());
-            user.setEmail(oAuth2Response.getEmail());
-            user = userRepository.save(user);  // UPDATE
+        if (userOpt.isPresent()) {
+            user = userOpt.get();
+            log.info("기존 사용자 발견: {} (role: {})", username, user.getRole());
+        } else {
+            log.info("신규 사용자 생성: {}", username);
+            User newUser = new User();
+            newUser.setUsername(username);
+            newUser.setName(oAuth2Response.getName());
+            newUser.setEmail(oAuth2Response.getEmail());
+            newUser.setRole("ROLE_USER");
+            user = userRepository.saveAndFlush(newUser);  // 핵심: flush()로 DB 즉시 반영!
         }
 
-        // 3. DTO 생성 (role은 DB 그대로)
+        // 2. 정보 업데이트 (role은 유지)
+        user.setName(oAuth2Response.getName());
+        user.setEmail(oAuth2Response.getEmail());
+        user = userRepository.save(user);
+
+        // 3. DTO 생성
         UserDTO userDTO = UserDTO.builder()
                 .username(user.getUsername())
                 .name(user.getName())
                 .email(user.getEmail())
                 .profileImg(user.getProfileImg())
-                .role(user.getRole())  // DB에서 온 그대로
+                .role(user.getRole())
                 .build();
 
         return new CustomOAuth2User(userDTO);
