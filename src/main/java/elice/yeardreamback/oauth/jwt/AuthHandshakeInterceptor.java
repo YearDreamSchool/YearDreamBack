@@ -39,19 +39,34 @@ public class AuthHandshakeInterceptor implements HandshakeInterceptor {
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                    WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
-        // 1. 요청 URI의 쿼리 파라미터를 파싱합니다. (예: /ws?token=xxx)
+        // 1. 요청 URI의 쿼리 파라미터를 파싱합니다. (예: /ws?token=xxx&t=yyy)
         String query = request.getURI().getQuery();
+        String token = null;
 
-        if (query != null && query.startsWith("token=")) {
-            String token = query.split("=")[1];
+        if (query != null) {
+            String[] params = query.split("&");
+            for (String param : params) {
+                if (param.startsWith("token=")) {
+                    token = param.substring("token=".length());
+                    break;
+                }
+            }
+        }
 
+        if (token != null) {
             // 2. 토큰 만료 여부를 검증합니다.
-            if (!jwtUtil.isExpired(token)) {
-                // 3. 토큰이 유효하면 사용자 이름(username)을 WebSocket 세션 속성(attributes)에 저장하고 연결을 허용합니다.
-                attributes.put("username", jwtUtil.getUsername(token));
-                attributes.put("HANDSHAKE_SUCCESS", true);
-                log.info("WebSocket Handshake SUCCESS for user: {}", jwtUtil.getUsername(token));
-                return true;
+            try {
+                if (!jwtUtil.isExpired(token)) {
+                    // 3. 토큰이 유효하면 사용자 이름(username)을 WebSocket 세션 속성(attributes)에 저장하고 연결을 허용합니다.
+                    attributes.put("username", jwtUtil.getUsername(token));
+                    attributes.put("HANDSHAKE_SUCCESS", true);
+                    log.info("WebSocket Handshake SUCCESS for user: {}", jwtUtil.getUsername(token));
+                    return true;
+                }
+            } catch (Exception e) {
+                log.warn("WebSocket Handshake FAILED: Token validation error. URI: {}", request.getURI(), e);
+                response.setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
+                return false;
             }
         }
 
