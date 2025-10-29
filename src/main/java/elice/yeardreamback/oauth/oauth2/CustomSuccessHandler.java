@@ -54,7 +54,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         log.info("사용자 정보 - username: {}, name: {}, role: {}, email: {}", username, name, role, email);
 
         // 2. 토큰 만료 시간 설정
-        long accessExpiredMs = 30 * 1000L;                 // 30초 (테스트용)
+        long accessExpiredMs = 15 * 60 * 1000L;             // 15분
         long refreshExpiredMs = 7L * 24 * 60 * 60 * 1000;   // 7일
         log.info("토큰 만료 설정 - access: {}ms, refresh: {}ms", accessExpiredMs, refreshExpiredMs);
 
