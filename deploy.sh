@@ -1,3 +1,6 @@
+echo "앱 중지 중..."
+docker-compose down app
+
 echo "코드 빌드 중..."
 docker-compose build app
 
