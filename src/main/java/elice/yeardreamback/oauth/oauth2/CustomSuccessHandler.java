@@ -84,8 +84,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addCookie(refreshCookie);
         log.info("RefreshToken 쿠키 설정 완료: {}", refreshCookie);
 
-	    refreshCookie.setDomain("yeardream.codns.com");
-//        refreshCookie.setDomain("localhost");
+	refreshCookie.setDomain("yeardream.site");
 
         // 5. Access Token을 쿼리 파라미터로 포함하여 클라이언트(프론트엔드)로 리다이렉트
         String redirectUri = "https://yeardream.site";
