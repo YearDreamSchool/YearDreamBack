@@ -73,7 +73,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     newUser.setName(oAuth2Response.getName());
                     newUser.setUsername(username);
                     newUser.setEmail(oAuth2Response.getEmail());
-                    newUser.setRole("USER"); // 기본 역할 설정
                     return userRepository.save(newUser);
                 });
 

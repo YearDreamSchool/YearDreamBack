@@ -1,5 +1,6 @@
 package elice.yeardreamback.user.entity;
 
+import elice.yeardreamback.user.enums.UserRoleType;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,7 +41,7 @@ public class User {
     /**
      * 사용자의 권한 등급입니다. (예: "USER", "COACH", "ADMIN")
      */
-    private String role;
+    private String role = UserRoleType.USER.toString();
 
     /**
      * 사용자의 프로필 이미지 URL 또는 파일 경로입니다.
